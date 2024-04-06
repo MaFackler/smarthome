@@ -1,0 +1,69 @@
+version: "2.1"
+services:
+
+  influxdb:
+    image: "influxdb:1.8"
+    container_name: "influxdb"
+    ports:
+      - 8086:8086
+    environment:
+      - DOCKER_INFLUXDB_INIT_MODE=setup
+      - DOCKER_INFLUXDB_INIT_USERNAME=admin
+      - DOCKER_INFLUXDB_INIT_PASSWORD=adminadmin
+      - DOCKER_INFLUXDB_INIT_ORG=myorg
+      - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
+    volumes:
+      - ./influxdb/data:/var/lib/influxdb
+      - ./influxdb/logs:/var/log/influxdb
+      - ./influxdb/home:/home/influxdb
+
+  chronograf:
+    image: "chronograf"
+    container_name: "chronograf"
+    ports:
+      - 8888:8888
+  grafana:
+    image: "grafana/grafana:latest"
+    container_name: "grafana"
+    ports:
+      - 3000:3000
+    volumes:
+      - ./grafana/config:/etc/grafana
+
+  homeassistant:
+    container_name: homeassistant
+    image: "ghcr.io/home-assistant/home-assistant:stable"
+    volumes:
+      - ./homeassistant/config:/config
+      - /etc/localtime:/etc/localtime:ro
+    restart: unless-stopped
+    privileged: true
+    network_mode: host
+
+  mosquitto:
+    image: eclipse-mosquitto
+    hostname: mosquitto
+    container_name: mosquitto
+    restart: unless-stopped
+    ports:
+      - 1883:1883
+      - 9001:9001
+    volumes:
+      - ./mosquitto/config/mosquitto.conf:/mosquitto/config/mosquitto.conf
+      - ./mosquitto/config/cred:/mosquitto/config/cred
+
+  # influxdb:
+  #   image: "influxdb:2.2"
+  #   container_name: "influxdb"
+  #   ports:
+  #     - 8086:8086
+  #   environment:
+  #     - DOCKER_INFLUXDB_INIT_MODE=setup
+  #     - DOCKER_INFLUXDB_INIT_USERNAME=admin
+  #     - DOCKER_INFLUXDB_INIT_PASSWORD=adminadmin
+  #     - DOCKER_INFLUXDB_INIT_ORG=myorg
+  #     - DOCKER_INFLUXDB_INIT_BUCKET=mybucket
+  #   volumes:
+  #     - ./influxdb/data:/var/lib/influxdb2
+  #     - ./influxdb/logs:/var/log/influxdb2
+  #     - ./influxdb/home:/home/influxdb
